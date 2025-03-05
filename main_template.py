@@ -70,7 +70,9 @@ class ExtractContent(Resource):
         app = FirecrawlApp(api_key='fc-cc5558ed7db5423a842ac4f744514257')
 
         data = app.extract([
-        "https://pharmac.govt.nz/pharmaceutical-schedule/general-rules-section-a"
+            "https://lawsociety.org.nz/professional-practice/legal-practice/restoration-to-the-roll",
+            "https://lawsociety.org.nz/news/law-society-statements/2024-25-practising-fees-and-membership-subscription",
+            "https://lawsociety.org.nz/for-the-public/lawyers-fidelity-fund"
         ], {
             'prompt': '',
             'schema': ExtractSchema.model_json_schema(),
