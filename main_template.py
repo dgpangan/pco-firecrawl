@@ -39,9 +39,13 @@ class UppercaseText(Resource):
 
         return jsonify({"text": text.upper()})
 
-class ExtractSchema(BaseModel):
+class NestedModel1(BaseModel):
     title: str
     fulltext_compressed: str
+    url: str = None
+
+class ExtractSchema(BaseModel):
+    pages: list[NestedModel1]
 
 class ExtractContent(Resource):
     def get(self):
@@ -58,12 +62,20 @@ class ExtractContent(Resource):
                         schema:
                             type: object
                             properties:
-                                title:
-                                    type: string
-                                    description: The title of the page
-                                fulltext_compressed:
-                                    type: string
-                                    description: The compressed full text content
+                                pages:
+                                    type: array
+                                    items:
+                                        type: object
+                                        properties:
+                                            title:
+                                                type: string
+                                                description: The title of the page
+                                            fulltext_compressed:
+                                                type: string
+                                                description: The compressed full text content
+                                            url:
+                                                type: string
+                                                description: The URL of the page
             500:
                 description: Extraction failed
         """
@@ -72,7 +84,7 @@ class ExtractContent(Resource):
         data = app.extract([
             "https://lawsociety.org.nz/professional-practice/legal-practice/restoration-to-the-roll",
             "https://lawsociety.org.nz/news/law-society-statements/2024-25-practising-fees-and-membership-subscription",
-            "https://lawsociety.org.nz/for-the-public/lawyers-fidelity-fund"
+            "https://www.lawsociety.org.nz/for-the-public/lawyers-fidelity-fund/"
         ], {
             'prompt': '',
             'schema': ExtractSchema.model_json_schema(),
