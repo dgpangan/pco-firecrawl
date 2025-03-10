@@ -84,7 +84,7 @@ class ExtractContent(Resource):
         data = app.extract([
             "https://lawsociety.org.nz/professional-practice/legal-practice/restoration-to-the-roll",
             "https://lawsociety.org.nz/news/law-society-statements/2024-25-practising-fees-and-membership-subscription",
-            "https://www.lawsociety.org.nz/for-the-public/lawyers-fidelity-fund/"
+            "https://lawsociety.org.nz/for-the-public/lawyers-fidelity-fund"
         ], {
             'prompt': '',
             'schema': ExtractSchema.model_json_schema(),
