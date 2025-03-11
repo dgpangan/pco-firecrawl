@@ -36,11 +36,8 @@ class ExtractContent(Resource):
                         properties:
                             urls:
                                 type: string
-                                description: Newline-separated URLs to extract content from
-                                example: |
-                                    https://example.com/page1
-                                    https://example.com/page2
-                                    https://example.com/page3
+                                description: Semicolon-separated URLs to extract content from
+                                example: "https://example.com/page1;https://example.com/page2;https://example.com/page3"
         responses:
             200:
                 description: Successfully extracted content
@@ -77,8 +74,8 @@ class ExtractContent(Resource):
             if not isinstance(urls, str):
                 return {'error': 'urls must be a string'}, 400
 
-            # Split the string into a list of URLs, removing empty lines and whitespace
-            url_list = [url.strip() for url in urls.splitlines() if url.strip()]
+            # Split the string into a list of URLs using semicolon as delimiter
+            url_list = [url.strip() for url in urls.split(';') if url.strip()]
             
             if not url_list:
                 return {'error': 'No valid URLs provided'}, 400
