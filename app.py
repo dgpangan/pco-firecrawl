@@ -17,13 +17,30 @@ class NestedModel1(BaseModel):
 class ExtractSchema(BaseModel):
     pages: list[NestedModel1]
 
+class ExtractRequestSchema(BaseModel):
+    urls: str
+
 class ExtractContent(Resource):
-    def get(self):
+    def post(self):
         """
-        This method extracts content from the Pharmac rules page using Firecrawl.
+        This method extracts content from the provided URLs using Firecrawl.
         ---
         tags:
         - Content Extraction
+        requestBody:
+            required: true
+            content:
+                application/json:
+                    schema:
+                        type: object
+                        properties:
+                            urls:
+                                type: string
+                                description: Newline-separated URLs to extract content from
+                                example: |
+                                    https://example.com/page1
+                                    https://example.com/page2
+                                    https://example.com/page3
         responses:
             200:
                 description: Successfully extracted content
@@ -46,21 +63,36 @@ class ExtractContent(Resource):
                                             url:
                                                 type: string
                                                 description: The URL of the page
+            400:
+                description: Invalid request payload
             500:
                 description: Extraction failed
         """
-        app = FirecrawlApp(api_key='fc-cc5558ed7db5423a842ac4f744514257')
+        try:
+            payload = request.get_json()
+            if not payload or 'urls' not in payload:
+                return {'error': 'Missing urls in request payload'}, 400
 
-        data = app.extract([
-            "https://lawsociety.org.nz/professional-practice/legal-practice/restoration-to-the-roll",
-            "https://lawsociety.org.nz/news/law-society-statements/2024-25-practising-fees-and-membership-subscription",
-            "https://lawsociety.org.nz/for-the-public/lawyers-fidelity-fund"
-        ], {
-            'prompt': '',
-            'schema': ExtractSchema.model_json_schema(),
-        })
+            urls = payload['urls']
+            if not isinstance(urls, str):
+                return {'error': 'urls must be a string'}, 400
 
-        return jsonify(data)
+            # Split the string into a list of URLs, removing empty lines and whitespace
+            url_list = [url.strip() for url in urls.splitlines() if url.strip()]
+            
+            if not url_list:
+                return {'error': 'No valid URLs provided'}, 400
+
+            app = FirecrawlApp(api_key='fc-cc5558ed7db5423a842ac4f744514257')
+
+            data = app.extract(url_list, {
+                'prompt': '',
+                'schema': ExtractSchema.model_json_schema(),
+            })
+
+            return jsonify(data)
+        except Exception as e:
+            return {'error': str(e)}, 500
 
 api.add_resource(ExtractContent, "/extract")
 
